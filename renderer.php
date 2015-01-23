@@ -49,7 +49,7 @@ class format_nead_unicentro_renderer extends format_section_renderer_base {
         $page->set_other_editing_capability('moodle/course:setcurrentsection');
     }
 
-    protected function render_format_nead_unicentro_course_header(format_unicentro_course_header $me) {
+    protected function render_format_nead_unicentro_course_header(format_nead_unicentro_course_header $me) {
     // Do nothing with $me.
     
       //return html_writer::tag('div', 'This is my header');
@@ -103,7 +103,7 @@ class format_nead_unicentro_renderer extends format_section_renderer_base {
       
     }    
     
-    protected function render_format_nead_unicentro_course_content_header(format_unicentro_course_content_header $me) {
+    protected function render_format_nead_unicentro_course_content_header(format_nead_unicentro_course_content_header $me) {
       return '';
     
     /*
