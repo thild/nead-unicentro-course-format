@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Renderer for outputting the unicentro course format.
+ * Renderer for outputting the nead_unicentro course format.
  *
- * @package format_unicentro
+ * @package format_nead_unicentro
  * @copyright 2012 Dan Poltawski
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @since Moodle 2.3
@@ -28,12 +28,12 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot.'/course/format/renderer.php');
 
 /**
- * Basic renderer for unicentro format.
+ * Basic renderer for nead_unicentro format.
  *
  * @copyright 2012 Dan Poltawski
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class format_unicentro_renderer extends format_section_renderer_base {
+class format_nead_unicentro_renderer extends format_section_renderer_base {
 
     /**
      * Constructor method, calls the parent constructor
@@ -44,20 +44,20 @@ class format_unicentro_renderer extends format_section_renderer_base {
     public function __construct(moodle_page $page, $target) {
         parent::__construct($page, $target);
 
-        // Since format_unicentro_renderer::section_edit_controls() only displays the 'Set current section' control when editing mode is on
+        // Since format_nead_unicentro_renderer::section_edit_controls() only displays the 'Set current section' control when editing mode is on
         // we need to be sure that the link 'Turn editing mode on' is available for a user who does not have any other managing capability.
         $page->set_other_editing_capability('moodle/course:setcurrentsection');
     }
 
-    protected function render_format_unicentro_course_header(format_unicentro_course_header $me) {
+    protected function render_format_nead_unicentro_course_header(format_unicentro_course_header $me) {
     // Do nothing with $me.
     
       //return html_writer::tag('div', 'This is my header');
-      //return render_format_unicentro_course_content_header($me);
+      //return render_format_nead_unicentro_course_content_header($me);
 
       global $PAGE;
       
-      if($PAGE->pagetype != 'course-view-unicentro' || $PAGE->user_is_editing()) {
+      if($PAGE->pagetype != 'course-view-nead_unicentro' || $PAGE->user_is_editing()) {
 	return '';
       }
 
@@ -103,7 +103,7 @@ class format_unicentro_renderer extends format_section_renderer_base {
       
     }    
     
-    protected function render_format_unicentro_course_content_header(format_unicentro_course_content_header $me) {
+    protected function render_format_nead_unicentro_course_content_header(format_unicentro_course_content_header $me) {
       return '';
     
     /*

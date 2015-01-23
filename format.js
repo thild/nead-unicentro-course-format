@@ -1,4 +1,4 @@
-// Javascript functions for Unicentro course format
+// Javascript functions for Nead/Unicentro course format
 
 M.course = M.course || {};
 
@@ -8,7 +8,7 @@ M.course.format = M.course.format || {};
  * Get sections config for this format
  *
  * The section structure is:
- * <ul class="unicentro">
+ * <ul class="nead_unicentro">
  *  <li class="section">...</li>
  *  <li class="section">...</li>
  *   ...
@@ -19,7 +19,7 @@ M.course.format = M.course.format || {};
 M.course.format.get_config = function() {
     return {
         container_node : 'ul',
-        container_class : 'unicentro',
+        container_class : 'nead_unicentro',
         section_node : 'li',
         section_class : 'section'
     };

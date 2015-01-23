@@ -16,20 +16,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'format_unicentro', language 'en', branch 'MOODLE_20_STABLE'
+ * Strings for component 'format_nead_unicentro', language 'en', branch 'MOODLE_20_STABLE'
  *
- * @package   format_unicentro
+ * @package   format_nead_unicentro
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['currentsection'] = 'This topic';
-$string['sectionname'] = 'Topic';
-$string['pluginname'] = 'Unicentro format';
-$string['section0name'] = 'General';
-$string['page-course-view-unicentro'] = 'Any course main page in unicentro format';
-$string['page-course-view-unicentro-x'] = 'Any course page in unicentro format';
-$string['hidefromothers'] = 'Hide topic';
-$string['showfromothers'] = 'Show topic';
+$string['currentsection'] = 'Este tópico';
+$string['sectionname'] = 'Tópico';
+$string['pluginname'] = 'Formato Nead/Unicentro';
+$string['section0name'] = 'Geral';
+$string['page-course-view-nead_unicentro'] = 'Qualquer página principal no formato Nead/Unicentro';
+$string['page-course-view-nead_unicentro-x'] = 'Qualquer página de curso no formato Nead/Unicentro';
+$string['hidefromothers'] = 'Esconder tópico';
+$string['showfromothers'] = 'Mostrar tópico';
 $string['headinginfo'] = 'Informações do cabeçalho';
 $string['headinginfo_help'] = 'Insira as informações do cabeçalho';

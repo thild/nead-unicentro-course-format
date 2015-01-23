@@ -18,7 +18,7 @@
  * This file contains main class for the course format Topic
  *
  * @since     Moodle 2.0
- * @package   format_unicentro
+ * @package   format_nead_unicentro
  * @copyright 2009 Sam Hemelryk
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot. '/course/format/lib.php');
 
-class format_unicentro_course_header implements renderable {
+class format_nead_unicentro_course_header implements renderable {
     private $course;
 
     function __construct($course)
@@ -40,7 +40,7 @@ class format_unicentro_course_header implements renderable {
 
 }
 
-class format_unicentro_course_content_header implements renderable {
+class format_nead_unicentro_course_content_header implements renderable {
   
     private $course;
 
@@ -58,13 +58,13 @@ class format_unicentro_course_content_header implements renderable {
 }
 
 /**
- * Main class for the Unicentro course format
+ * Main class for the Nead/Unicentro course format
  *
- * @package    format_unicentro
+ * @package    format_nead_unicentro
  * @copyright  2012 Marina Glancy
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class format_unicentro extends format_base {
+class format_nead_unicentro extends format_base {
 
     private $settings;
     /**
@@ -89,11 +89,11 @@ class format_unicentro extends format_base {
 
     
     public function course_header() {
-      return new format_unicentro_course_header($this->get_course());
+      return new format_nead_unicentro_course_header($this->get_course());
     }
     
     public function course_content_header() {
-      return new format_unicentro_course_content_header($this->get_course());
+      return new format_nead_unicentro_course_content_header($this->get_course());
     }
     
     /**
@@ -110,7 +110,7 @@ class format_unicentro extends format_base {
             return format_string($section->name, true,
                     array('context' => context_course::instance($this->courseid)));
         } else if ($section->section == 0) {
-            return get_string('section0name', 'format_unicentro');
+            return get_string('section0name', 'format_nead_unicentro');
         } else {
             return get_string('topic').' '.$section->section;
         }
@@ -234,7 +234,7 @@ class format_unicentro extends format_base {
     /**
      * Definitions of the additional options that this course format uses for course
      *
-     * Unicentro format uses the following options:
+     * Nead/Unicentro format uses the following options:
      * - coursedisplay
      * - numsections
      * - hiddensections
@@ -261,7 +261,7 @@ class format_unicentro extends format_base {
                     'type' => PARAM_INT,
                 ),
                 'headinginfo' => array(
-                    'default' => get_config('format_unicentro', 'headinginfo'),
+                    'default' => get_config('format_nead_unicentro', 'headinginfo'),
                     'type' => PARAM_RAW,
                 ),
             );
@@ -307,10 +307,10 @@ class format_unicentro extends format_base {
                     'help_component' => 'moodle',
                 ),
                 'headinginfo' => array(
-                    'label' => new lang_string('headinginfo', 'format_unicentro'),
+                    'label' => new lang_string('headinginfo', 'format_nead_unicentro'),
                     'element_type' => 'htmleditor',
                     'help' => 'headinginfo',
-                    'help_component' => 'format_unicentro',
+                    'help_component' => 'format_nead_unicentro',
                 ),
             );
             $courseformatoptions = array_merge_recursive($courseformatoptions, $courseformatoptionsedit);
@@ -352,7 +352,7 @@ class format_unicentro extends format_base {
     /**
      * Updates format options for a course
      *
-     * In case if course format was changed to 'unicentro', we try to copy options
+     * In case if course format was changed to 'nead_unicentro', we try to copy options
      * 'coursedisplay', 'numsections' and 'hiddensections' from the previous format.
      * If previous course format did not have 'numsections' option, we populate it with the
      * current number of sections

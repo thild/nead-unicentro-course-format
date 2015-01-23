@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Unicentro course format.  Display the whole course as "unicentro" made of modules.
+ * Nead/Unicentro course format.  Display the whole course as "nead_unicentro" made of modules.
  *
- * @package format_unicentro
+ * @package format_nead_unicentro
  * @copyright 2006 The Open University
  * @author N.D.Freear@open.ac.uk, and others.
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -52,7 +52,7 @@ $editing = $PAGE->user_is_editing();
   $course = course_get_format($course)->get_course();
   course_create_sections_if_missing($course, range(0, $course->numsections));
 
-  $renderer = $PAGE->get_renderer('format_unicentro');
+  $renderer = $PAGE->get_renderer('format_nead_unicentro');
 
   if (!empty($displaysection)) {
       $renderer->print_single_section_page($course, null, null, null, null, $displaysection);
@@ -70,4 +70,4 @@ else {
 */  
 //print_object($sections);
 // Include course format js module
-$PAGE->requires->js('/course/format/unicentro/format.js');
+$PAGE->requires->js('/course/format/nead_unicentro/format.js');
