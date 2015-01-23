@@ -52,41 +52,62 @@ class format_unicentro_renderer extends format_section_renderer_base {
     protected function render_format_unicentro_course_header(format_unicentro_course_header $me) {
     // Do nothing with $me.
     
-      return html_writer::tag('div', 'This is my header');
+      //return html_writer::tag('div', 'This is my header');
+      //return render_format_unicentro_course_content_header($me);
+
+      global $PAGE;
       
+      if($PAGE->pagetype != 'course-view-unicentro' || $PAGE->user_is_editing()) {
+	return '';
+      }
+
+      $course = $me->getCourse();
+      $modinfo = get_fast_modinfo($course);
+      $course = course_get_format($course)->get_course();
+
+      $context = context_course::instance($course->id);
+
+
+      $tabs = html_writer::start_tag('ul', array('class' => 'nav nav-tabs', 'role' => 'tablist'));
+      foreach ($modinfo->get_section_info_all() as $section => $thissection) {
+	if ($section > $course->numsections) {
+	    // activities inside this section are 'orphaned', this section will be printed as 'stealth' below
+	    continue;
+	}	
+
+	
+            // Show the section if the user is permitted to access it, OR if it's not available
+            // but there is some available info text which explains the reason & should display.
+            $showsection = $thissection->uservisible ||
+                    ($thissection->visible && !$thissection->available &&
+                    !empty($thissection->availableinfo));
+            if (!$showsection) {
+                continue;
+            }
+
+	$strsec = 'section-' . $section;
+	if($section == 0) {
+	  $tabs .= html_writer::start_tag('li', array('class' => 'active', 'role' => 'presentation'));
+	}
+	else {
+	  $tabs .= html_writer::start_tag('li', array('role' => 'presentation'));
+	}
+	
+	$tabs .= html_writer::link('#' . $strsec, get_section_name($course, $section), array('aria-controls' => $strsec, 'role' => 'tab', 'data-toggle' => 'tab'));
+	
+	$tabs .= html_writer::end_tag('li');
+      }
+
+      $tabs .= html_writer::end_tag('ul');
+      return html_writer::tag('div', $tabs);      
       
     }    
     
     protected function render_format_unicentro_course_content_header(format_unicentro_course_content_header $me) {
+      return '';
+    
+    /*
       global $PAGE;
-    
-    $str = <<<'EOD'
-    
-<div role="tabpanel">
-
-  <!-- Nav tabs -->
-  <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#section-0" aria-controls="section-0" role="tab" data-toggle="tab">Home</a></li>
-    <li role="presentation"><a href="#section-1" aria-controls="section-1" role="tab" data-toggle="tab">Profile</a></li>
-    <li role="presentation"><a href="#section-2" aria-controls="section-2" role="tab" data-toggle="tab">Messages</a></li>
-    <li role="presentation"><a href="#section-3" aria-controls="section-3" role="tab" data-toggle="tab">Settings</a></li>
-  </ul>
-
-
-</div>    
-
-EOD;
-
-/*
-  <!-- Tab panes -->
-  <div class="tab-content">
-    <div role="tabpanel" class="tab-pane active" id="#section-1">aas</div>
-    <div role="tabpanel" class="tab-pane" id="profile-panel">bbb</div>
-    <div role="tabpanel" class="tab-pane" id="messages-panel">ccc</div>
-    <div role="tabpanel" class="tab-pane" id="settings-panel">ddd</div>
-  </div>
-
-*/    
 
       if($PAGE->pagetype == 'course-edit') {
 	return '';
@@ -135,6 +156,7 @@ EOD;
 
       $tabs .= html_writer::end_tag('ul');
       return html_writer::tag('div', $tabs);
+      */
     }    
     
     /**

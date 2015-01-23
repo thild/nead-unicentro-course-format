@@ -31,3 +31,5 @@ $string['page-course-view-unicentro'] = 'Qualquer página principal no formato U
 $string['page-course-view-unicentro-x'] = 'Qualquer página de curso no formato Unicentro';
 $string['hidefromothers'] = 'Esconder tópico';
 $string['showfromothers'] = 'Mostrar tópico';
+$string['headinginfo'] = 'Informações do cabeçalho';
+$string['headinginfo_help'] = 'Insira as informações do cabeçalho';

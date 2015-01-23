@@ -26,7 +26,19 @@
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot. '/course/format/lib.php');
 
-class format_unicentro_course_header implements renderable {}
+class format_unicentro_course_header implements renderable {
+    private $course;
+
+    function __construct($course)
+    { 
+      $this->course = $course;
+    }
+
+    public function getCourse(){
+      return $this->course;
+    }
+
+}
 
 class format_unicentro_course_content_header implements renderable {
   
@@ -54,6 +66,18 @@ class format_unicentro_course_content_header implements renderable {
  */
 class format_unicentro extends format_base {
 
+    private $settings;
+    /**
+    * Returns the format's settings and gets them if they do not exist.
+    * @return type The settings as an array.
+    */
+    public function get_settings() {
+	if (empty($this->settings) == true) {
+	    $this->settings = $this->get_format_options();
+	}
+	return $this->settings;
+    }
+
     /**
      * Returns true if this course format uses sections
      *
@@ -65,7 +89,7 @@ class format_unicentro extends format_base {
 
     
     public function course_header() {
-      return new format_unicentro_course_header;
+      return new format_unicentro_course_header($this->get_course());
     }
     
     public function course_content_header() {
@@ -214,6 +238,7 @@ class format_unicentro extends format_base {
      * - coursedisplay
      * - numsections
      * - hiddensections
+     * - headinginfo
      *
      * @param bool $foreditform
      * @return array of options
@@ -234,6 +259,10 @@ class format_unicentro extends format_base {
                 'coursedisplay' => array(
                     'default' => $courseconfig->coursedisplay,
                     'type' => PARAM_INT,
+                ),
+                'headinginfo' => array(
+                    'default' => get_config('format_unicentro', 'headinginfo'),
+                    'type' => PARAM_RAW,
                 ),
             );
         }
@@ -276,7 +305,13 @@ class format_unicentro extends format_base {
                     ),
                     'help' => 'coursedisplay',
                     'help_component' => 'moodle',
-                )
+                ),
+                'headinginfo' => array(
+                    'label' => new lang_string('headinginfo', 'format_unicentro'),
+                    'element_type' => 'htmleditor',
+                    'help' => 'headinginfo',
+                    'help_component' => 'format_unicentro',
+                ),
             );
             $courseformatoptions = array_merge_recursive($courseformatoptions, $courseformatoptionsedit);
         }
