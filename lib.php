@@ -66,16 +66,12 @@ class format_nead_unicentro_course_content_header implements renderable {
  */
 class format_nead_unicentro extends format_base {
 
-    private $settings;
     /**
     * Returns the format's settings and gets them if they do not exist.
     * @return type The settings as an array.
     */
     public function get_settings() {
-	if (empty($this->settings) == true) {
-	    $this->settings = $this->get_format_options();
-	}
-	return $this->settings;
+	return get_config('format_nead_unicentro');
     }
 
     /**
@@ -96,6 +92,44 @@ class format_nead_unicentro extends format_base {
       return new format_nead_unicentro_course_content_header($this->get_course());
     }
     
+    public function section_format_options($foreditform = false) {
+        static $sectionformatoptions = false;
+        if ($sectionformatoptions === false) {
+            $sectionformatoptions = array(
+                'tabtitle' => array(
+                    'type' => PARAM_NOTAGS,
+                ),
+                /*
+                'menuitemgroup' => array(
+                    'type' => PARAM_NOTAGS,
+                ),
+                */
+            );
+        }
+
+        if ($foreditform && !isset($sectionformatoptions['tabtitle']['label'])) {
+            $sectionformatoptionsedit = array(
+                'tabtitle' => array(
+                    'label' => new lang_string('tabtitle', 'format_nead_unicentro'),
+                    'element_type' => 'text',
+                    'help' => 'tabtitle',
+                    'help_component' => 'format_nead_unicentro',
+                ),
+                /*
+                'menuitemgroup' => array(
+                    'label' => new lang_string('menuitemgroup', 'format_nead_unicentro'),
+                    'element_type' => 'text',
+                    'help' => 'menuitemgroup',
+                    'help_component' => 'format_nead_unicentro',
+                ),
+                */
+            );
+            $sectionformatoptions = array_merge_recursive($sectionformatoptions, $sectionformatoptionsedit);
+        }
+        return $sectionformatoptions;
+    }
+
+    
     /**
      * Returns the display name of the given section that the course prefers.
      *
@@ -113,6 +147,96 @@ class format_nead_unicentro extends format_base {
             return get_string('section0name', 'format_nead_unicentro');
         } else {
             return get_string('topic').' '.$section->section;
+        }
+    }
+
+    /**
+     * Returns URL to the stored file via pluginfile.php.
+     *
+     * Note the theme must also implement pluginfile.php handler,
+     * theme revision is used instead of the itemid.
+     *
+     * @param string $setting
+     * @param string $filearea
+     * @return string protocol relative URL or null if not present
+     */
+    public function setting_file_url($setting, $filearea) {
+        global $CFG;
+
+        if (empty($this->get_settings()->$setting)) {
+            return null;
+        }
+        
+
+        $component = 'format_nead_unicentro';
+        $itemid = '-1';
+        $filepath = $this->get_settings()->$setting;
+        $syscontext = context_system::instance();
+        
+        
+        $url = moodle_url::make_file_url("$CFG->wwwroot/pluginfile.php", "/$syscontext->id/$component/$filearea/$itemid".$filepath);
+
+        // Now this is tricky because the we can not hardcode http or https here, lets use the relative link.
+        // Note: unfortunately moodle_url does not support //urls yet.
+
+        $url = preg_replace('|^https?://|i', '//', $url->out(false));
+
+        return $url;
+    }
+
+    public function option_file_url($option, $filearea) {
+        global $CFG, $course;
+        
+        if (empty($this->get_format_options()[$option])) {
+            return null;
+        }
+        $component = 'format_nead_unicentro';
+        $itemid = '0';
+        $filepath = $this->get_format_options()[$option];
+        $context = context_course::instance($this->courseid);
+        
+        
+        //public function get_area_files($contextid, $component, $filearea, $itemid = false, $sort = "itemid, filepath, filename", $includedirs = true) {
+        
+	$fs = get_file_storage();
+	
+	if($fs->is_area_empty($context->id, "format_nead_unicentro", "headingimage")) return '';
+
+	$files = $fs->get_area_files($context->id, "format_nead_unicentro", "headingimage");
+	
+	$imgurl = '';
+	
+	foreach ($files as $file) {
+	  $imgurl = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(), $file->get_itemid(), $file->get_filepath(), $file->get_filename());
+	}
+       
+        //http://10.1.1.228/pluginfile.php/18/format_nead_unicentro/headingimage/0/logo-nead-ps.png
+        
+        $url = $imgurl . '';
+
+        // Now this is tricky because the we can not hardcode http or https here, lets use the relative link.
+        // Note: unfortunately moodle_url does not support //urls yet.
+
+        //$url = preg_replace('|^https?://|i', '//', $url->out(false));
+
+        return $url;
+    }
+    
+    
+    /**
+     * Returns the display name of the given section that the course prefers.
+     *
+     * Use section name is specified by user. Otherwise use default ("Topic #")
+     *
+     * @param int|stdClass $section Section object from database or just field section.section
+     * @return string Display name that the course format prefers, e.g. "Topic 2"
+     */
+    public function get_section_tabtitle($section) {
+        $section = $this->get_section($section);
+        if((string)$section->tabtitle !== '') {
+	  return $section->tabtitle;
+        } else {
+	  return get_section_name($section);
         }
     }
 
@@ -260,9 +384,21 @@ class format_nead_unicentro extends format_base {
                     'default' => $courseconfig->coursedisplay,
                     'type' => PARAM_INT,
                 ),
+                'headingimage' => array(
+                    'default' => get_config('format_nead_unicentro', 'headingimage'),
+                    'type' => PARAM_CLEANFILE,
+                ),
                 'headinginfo' => array(
                     'default' => get_config('format_nead_unicentro', 'headinginfo'),
                     'type' => PARAM_RAW,
+                ),
+                'teachers' => array(
+                    'default' => get_config('format_nead_unicentro', 'teachers'),
+                    'type' => PARAM_NOTAGS,
+                ),
+                'period' => array(
+                    'default' => get_config('format_nead_unicentro', 'period'),
+                    'type' => PARAM_NOTAGS,
                 ),
             );
         }
@@ -306,10 +442,28 @@ class format_nead_unicentro extends format_base {
                     'help' => 'coursedisplay',
                     'help_component' => 'moodle',
                 ),
+                'headingimage' => array(
+                    'label' => new lang_string('headingimage', 'format_nead_unicentro'),
+                    'element_type' => 'filemanager',
+                    'help' => 'headingimage',
+                    'help_component' => 'format_nead_unicentro',
+                ),
                 'headinginfo' => array(
                     'label' => new lang_string('headinginfo', 'format_nead_unicentro'),
                     'element_type' => 'htmleditor',
                     'help' => 'headinginfo',
+                    'help_component' => 'format_nead_unicentro',
+                ),
+                'teachers' => array(
+                    'label' => new lang_string('teachers', 'format_nead_unicentro'),
+                    'element_type' => 'text',
+                    'help' => 'teachers',
+                    'help_component' => 'format_nead_unicentro',
+                ),
+                'period' => array(
+                    'label' => new lang_string('period', 'format_nead_unicentro'),
+                    'element_type' => 'text',
+                    'help' => 'period',
                     'help_component' => 'format_nead_unicentro',
                 ),
             );
@@ -328,8 +482,22 @@ class format_nead_unicentro extends format_base {
      * @return array array of references to the added form elements.
      */
     public function create_edit_form_elements(&$mform, $forsection = false) {
+	global $course, $CFG;
         $elements = parent::create_edit_form_elements($mform, $forsection);
 
+        
+	$options = array(
+		'maxfiles' => $CFG->courseoverviewfileslimit,
+		'maxbytes' => $CFG->maxbytes,  
+		'subdirs' => 0,
+		'accepted_types' =>  '*'
+	);
+
+	//$context = context_course::instance($course->id);
+	//file_prepare_standard_filemanager($course, 'imageheader2', $options, $context, 'format_nead_unicentro', 'imageheader2', 0);
+	//$elements[] = $mform->addElement('filemanager', 'imageheader2_filemanager', 'Imagem de cabeçalho', null, $options);
+	//$mform->setDefault('imageheader2_filemanager', $course->imageheader2_filemanager);
+	
         // Increase the number of sections combo box values if the user has increased the number of sections
         // using the icon on the course page beyond course 'maxsections' or course 'maxsections' has been
         // reduced below the number of sections already set for the course on the site administration course
@@ -363,7 +531,17 @@ class format_nead_unicentro extends format_base {
      * @return bool whether there were any changes to the options values
      */
     public function update_course_format_options($data, $oldcourse = null) {
-        global $DB;
+        global $course, $CFG, $DB;
+
+	$options = array(
+		'maxfiles' => $CFG->courseoverviewfileslimit,
+		'maxbytes' => $CFG->maxbytes,
+		'subdirs' => 0,
+		'accepted_types' =>  '*'
+	);
+	$context = context_course::instance($this->courseid);
+	$saved = file_save_draft_area_files($data->headingimage, $context->id, 'format_nead_unicentro', 'headingimage', 0, array('subdirs' => 0, 'maxfiles' => 1));
+		
         if ($oldcourse !== null) {
             $data = (array)$data;
             $oldcourse = (array)$oldcourse;
@@ -388,4 +566,53 @@ class format_nead_unicentro extends format_base {
         }
         return $this->update_format_options($data);
     }
+
+    /**
+     * Allows course format to execute code on moodle_page::set_course()
+     *
+     * @param moodle_page $page instance of page calling set_course
+     */
+    public function page_set_course(moodle_page $page) {
+      $page->requires->jquery();
+      $page->requires->jquery_plugin('bootstrap', 'format_nead_unicentro');
+      $page->requires->jquery_plugin('jquery.cookie', 'format_nead_unicentro');
+      $page->requires->js('/course/format/nead_unicentro/javascript/tabs.js');
+      $page->requires->js('/course/format/nead_unicentro/javascript/fix.js');
+    }
+
+}
+
+
+function format_nead_unicentro_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
+    global $DB;
+       
+    if ($context->contextlevel != CONTEXT_COURSE) {
+        return false;
+    }
+    
+    require_login();
+    if ($filearea != 'headingimage') {
+        return false;
+    }
+    
+    $itemid = (int)array_shift($args);
+    if ($itemid != 0) {
+        return false;
+    }
+    
+    $fs = get_file_storage();
+    $filename = array_pop($args);
+    
+    if (empty($args)) {
+        $filepath = '/';
+    } else {
+        $filepath = '/'.implode('/', $args).'/';
+    }
+    
+    $file = $fs->get_file($context->id, 'format_nead_unicentro', $filearea, $itemid, $filepath, $filename);
+    if (!$file) {
+        return false;
+    }
+    
+    send_stored_file($file, 0, 0, $forcedownload, $options);
 }

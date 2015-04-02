@@ -50,40 +50,82 @@ class format_nead_unicentro_renderer extends format_section_renderer_base {
     }
 
     protected function render_format_nead_unicentro_course_header(format_nead_unicentro_course_header $me) {
-    // Do nothing with $me.
-    
-      //return html_writer::tag('div', 'This is my header');
-      //return render_format_nead_unicentro_course_content_header($me);
 
       global $PAGE;
       
-      if($PAGE->pagetype != 'course-view-nead_unicentro' || $PAGE->user_is_editing()) {
+      if($PAGE->devicetypeinuse != 'default' /*do not show the nav-tab on mobile devices*/) { 
 	return '';
       }
-
+      
       $course = $me->getCourse();
       $modinfo = get_fast_modinfo($course);
+      $format = course_get_format($course);
       $course = course_get_format($course)->get_course();
+      $options = $format->get_format_options();
 
       $context = context_course::instance($course->id);
+      
+      
+      $headingimage = $format->option_file_url('headingimage', 'headingimage');
+      $hascustomheadingimage = (!empty($headingimage));
+      if($hascustomheadingimage) {
+	    $headingimage = html_writer::empty_tag('img', array('src' => $headingimage, 'class' => 'heading-image', 'alt' => 'heading image', 'id' => 'heading-image'));
+      }
+      else {
+      	    $headingimage = html_writer::empty_tag('img', array('src' => $this->output->pix_url('defaultheadingimage', 'format_nead_unicentro'), 'class' => 'heading-image', 
+												'alt' => 'heading image', 'id' => 'heading-image'));
+      }
+      //$theme = theme_config::load('nead_unicentro');
+      
+      //$headingimage = html_writer::empty_tag('img', array('src' => $heading, 'class' => 'headingimage'));
 
+     
+      
+      $text = '';
+      $heading_info = '';
+      $teachers = '';
+      $period = '';
+      
+      $format_options = $format->get_format_options();
 
-      $tabs = html_writer::start_tag('ul', array('class' => 'nav nav-tabs', 'role' => 'tablist'));
+      $heading_info = $format_options['headinginfo'];
+      $teachers = $format_options['teachers'];
+      $period = $format_options['period'];
+
+      if($heading_info != '') {
+	$text = $heading_info;
+      }
+      else if ($teachers == '' and $period == '') {
+	$text = $this->output->page_heading();
+      }
+      else {
+	$fullname = $course->fullname;
+	$text = "<p>$fullname</p><p>$teachers</p><p>$period</p>";
+      }
+      
+      $heading_info = html_writer::tag('div', $text, array('class' => 'heading-info')); 
+      
+      $heading_container = html_writer::tag('div', $headingimage.$heading_info, array('class' => 'heading-container', 'data-custom-heading-image' => var_export($hascustomheadingimage, true)));
+      
+      if($PAGE->pagelayout != 'course' || $PAGE->user_is_editing()) { 
+	return $heading_container;
+      }
+      
+      $tabs = $heading_container . html_writer::start_tag('ul', array('class' => 'nav nav-tabs', 'role' => 'tablist'));
       foreach ($modinfo->get_section_info_all() as $section => $thissection) {
 	if ($section > $course->numsections) {
 	    // activities inside this section are 'orphaned', this section will be printed as 'stealth' below
 	    continue;
 	}	
 
-	
-            // Show the section if the user is permitted to access it, OR if it's not available
-            // but there is some available info text which explains the reason & should display.
-            $showsection = $thissection->uservisible ||
-                    ($thissection->visible && !$thissection->available &&
-                    !empty($thissection->availableinfo));
-            if (!$showsection) {
-                continue;
-            }
+	// Show the section if the user is permitted to access it, OR if it's not available
+	// but there is some available info text which explains the reason & should display.
+	$showsection = $thissection->uservisible ||
+		($thissection->visible && !$thissection->available &&
+		!empty($thissection->availableinfo));
+	if (!$showsection) {
+	    continue;
+	}
 
 	$strsec = 'section-' . $section;
 	if($section == 0) {
@@ -92,8 +134,11 @@ class format_nead_unicentro_renderer extends format_section_renderer_base {
 	else {
 	  $tabs .= html_writer::start_tag('li', array('role' => 'presentation'));
 	}
-	
-	$tabs .= html_writer::link('#' . $strsec, get_section_name($course, $section), array('aria-controls' => $strsec, 'role' => 'tab', 'data-toggle' => 'tab'));
+	$tabtitle = course_get_format($course)->get_format_options($thissection)['tabtitle'];
+	if($tabtitle == '') {
+	  $tabtitle = get_section_name($course, $section);
+	}
+	$tabs .= html_writer::link('#' . $strsec, $tabtitle, array('aria-controls' => $strsec, 'role' => 'tab', 'data-toggle' => 'tab'));
 	
 	$tabs .= html_writer::end_tag('li');
       }
@@ -105,58 +150,6 @@ class format_nead_unicentro_renderer extends format_section_renderer_base {
     
     protected function render_format_nead_unicentro_course_content_header(format_nead_unicentro_course_content_header $me) {
       return '';
-    
-    /*
-      global $PAGE;
-
-      if($PAGE->pagetype == 'course-edit') {
-	return '';
-      }
-
-      if($PAGE->user_is_editing()) {
-	return '';
-      }
-
-      $course = $me->getCourse();
-      $modinfo = get_fast_modinfo($course);
-      $course = course_get_format($course)->get_course();
-
-      $context = context_course::instance($course->id);
-
-
-      $tabs = html_writer::start_tag('ul', array('class' => 'nav nav-tabs', 'role' => 'tablist'));
-      foreach ($modinfo->get_section_info_all() as $section => $thissection) {
-	if ($section > $course->numsections) {
-	    // activities inside this section are 'orphaned', this section will be printed as 'stealth' below
-	    continue;
-	}	
-
-	
-            // Show the section if the user is permitted to access it, OR if it's not available
-            // but there is some available info text which explains the reason & should display.
-            $showsection = $thissection->uservisible ||
-                    ($thissection->visible && !$thissection->available &&
-                    !empty($thissection->availableinfo));
-            if (!$showsection) {
-                continue;
-            }
-
-	$strsec = 'section-' . $section;
-	if($section == 0) {
-	  $tabs .= html_writer::start_tag('li', array('class' => 'active', 'role' => 'presentation'));
-	}
-	else {
-	  $tabs .= html_writer::start_tag('li', array('role' => 'presentation'));
-	}
-	
-	$tabs .= html_writer::link('#' . $strsec, get_section_name($course, $section), array('aria-controls' => $strsec, 'role' => 'tab', 'data-toggle' => 'tab'));
-	
-	$tabs .= html_writer::end_tag('li');
-      }
-
-      $tabs .= html_writer::end_tag('ul');
-      return html_writer::tag('div', $tabs);
-      */
     }    
     
     /**
@@ -260,14 +253,14 @@ class format_nead_unicentro_renderer extends format_section_renderer_base {
 	  $active = 'in active';
 	}
 
-	if ($PAGE->user_is_editing()) {
+	if ($PAGE->user_is_editing() or $PAGE->devicetypeinuse != 'default') {
 	  $o.= html_writer::start_tag('li', array('id' => 'section-'.$section->section,
 	      'class' => 'section main clearfix'.$sectionstyle, 'role'=>'region',
 	      'aria-label'=> get_section_name($course, $section)));
 	}
 	else {
 	  $o.= html_writer::start_tag('li', array('id' => 'section-'.$section->section,
-	      'class' => 'tab-pane fade ' . $active . ' section main clearfix'.$sectionstyle, 'role'=>'tabpanel',
+	      'class' => 'tab-pane fade ' . $active . ' section main clearfix', 'role'=>'tabpanel',
 	      'aria-label'=> get_section_name($course, $section)));
 	}
 	
@@ -316,8 +309,14 @@ class format_nead_unicentro_renderer extends format_section_renderer_base {
      * @return string HTML to output.
      */
     protected function stealth_section_header($sectionno) {
+        global $PAGE;
         $o = '';
-        $o.= html_writer::start_tag('li', array('id' => 'section-'.$sectionno, 'class' => 'section main clearfix orphaned hidden'));
+	if ($PAGE->user_is_editing() or $PAGE->devicetypeinuse != 'default') {
+	    $o.= html_writer::start_tag('li', array('id' => 'section-'.$sectionno, 'class' => 'section main clearfix orphaned hidden'));
+	}
+	else {
+	    $o.= html_writer::start_tag('li', array('id' => 'section-'.$sectionno, 'class' => 'tab-pane fade section main clearfix orphaned', 'role'=>'tabpanel'));
+	}
         $o.= html_writer::tag('div', '', array('class' => 'left side'));
         $o.= html_writer::tag('div', '', array('class' => 'right side'));
         $o.= html_writer::start_tag('div', array('class' => 'content'));
@@ -344,6 +343,8 @@ class format_nead_unicentro_renderer extends format_section_renderer_base {
      * @return string HTML to output.
      */
     protected function section_hidden($sectionno, $courseorid = null) {
+	global $PAGE;
+	
         if ($courseorid) {
             $sectionname = get_section_name($courseorid, $sectionno);
             $strnotavailable = get_string('notavailablecourse', '', $sectionname);
@@ -352,7 +353,14 @@ class format_nead_unicentro_renderer extends format_section_renderer_base {
         }
 
         $o = '';
-        $o.= html_writer::start_tag('li', array('id' => 'section-'.$sectionno, 'class' => 'section main clearfix hidden'));
+        
+	if ($PAGE->user_is_editing() or $PAGE->devicetypeinuse != 'default') {
+	    $o.= html_writer::start_tag('li', array('id' => 'section-'.$sectionno, 'class' => 'section main clearfix hidden'));
+	}
+	else {
+	    $o.= html_writer::start_tag('li', array('id' => 'section-'.$sectionno, 'class' => 'tab-pane fade section main clearfix', 'role'=>'tabpanel'));
+	}
+        
         $o.= html_writer::tag('div', '', array('class' => 'left side'));
         $o.= html_writer::tag('div', '', array('class' => 'right side'));
         $o.= html_writer::start_tag('div', array('class' => 'content'));
